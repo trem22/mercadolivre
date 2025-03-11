@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Mercado Livre</title>
+    <style>
+        :root {
+            --ml-yellow: #FFE600;
+            --ml-yellow-dark: #F5D000;
+            --ml-text: #333333;
+            --ml-white: #FFFFFF;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Proxima Nova', -apple-system, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--ml-text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--ml-yellow);
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: var(--ml-text);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .quiz-container {
+            background-color: var(--ml-white);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            display: none;
+        }
+        
+        .question.active {
+            display: block;
+        }
+        
+        .question h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--ml-text);
+        }
+        
+        .options {
+            list-style: none;
+        }
+        
+        .option {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #eaeaea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .option:hover {
+            background-color: var(--ml-yellow);
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background-color: var(--ml-yellow);
+            border-color: var(--ml-yellow-dark);
+        }
+        
+        .option.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .option.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: var(--ml-yellow);
+            border: none;
+            border-radius: 5px;
+            color: var(--ml-text);
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        button:hover {
+            background-color: var(--ml-yellow-dark);
+        }
+        
+        button:disabled {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+        
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .result-container.active {
+            display: block;
+        }
+        
+        .score {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .feedback {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--ml-yellow);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            color: #777;
+        }
+        
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .quiz-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .option {
+                padding: 12px;
+            }
+            
+            button {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quiz sobre Mercado Livre</h1>
+            <p>Teste seus conhecimentos sobre a maior plataforma de e-commerce da América Latina</p>
+        </header>
+        
+        <div class="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div id="question-container">
+                <div class="question active" id="question-1">
+                    <h3>1. Quando o Mercado Livre foi criado?</h3>
+                    <ul class="options">
+                        <li class="option" data-correct="true">1999</li>
+                        <li class="option">2001</li>
+                        <li class="option">1995</li>
+                        <li class="option">2003</li>
+                    </ul>
+                    <div class="explanation">
+                        O Mercado Livre foi fundado em 1999 na Argentina.
+                    </div>
+                </div>
+                
+                <div class="question" id="question-2">
+                    <h3>2. O que fazer se o vendedor pedir para você fazer o pagamento direto para o PIX dele?</h3>
+                    <ul class="options">
+                        <li class="option">Fazer o pagamento para agilizar a entrega</li>
+                        <li class="option">Pedir um desconto antes de fazer o pagamento</li>
+                        <li class="option" data-correct="true">Não fazer o pagamento, pois é golpe</li>
+                        <li class="option">Verificar as avaliações do vendedor antes de decidir</li>
+                    </ul>
+                    <div class="explanation">
+                        Nunca faça pagamentos fora da plataforma do Mercado Livre. Solicitações de pagamento via PIX diretamente ao vendedor são sinais claros de golpe.
+                    </div>
+                </div>
+                
+                <div class="question" id="question-3">
+                    <h3>3. O que fazer se o vendedor pedir para você autorizar a compra no seu email?</h3>
+                    <ul class="options">
+                        <li class="option">Clicar no link enviado para agilizar a compra</li>
+                        <li class="option">Responder ao email com seus dados</li>
+                        <li class="option">Reenviar o email para o suporte do Mercado Livre</li>
+                        <li class="option" data-correct="true">Tomar cuidado, pois tem muita chance de ser golpe. Verificar o domínio no email e não clicar em links suspeitos</li>
+                    </ul>
+                    <div class="explanation">
+                        Emails solicitando autorização de compra geralmente são tentativas de phishing. Sempre verifique o domínio do email (deve ser @mercadolivre.com.br) e nunca clique em links suspeitos. Acesse diretamente o site oficial do Mercado Livre para verificar suas compras.
+                    </div>
+                </div>
+                
+                <div class="question" id="question-4">
+                    <h3>4. O que fazer se o vendedor pedir para conversar por WhatsApp?</h3>
+                    <ul class="options">
+                        <li class="option">Aceitar para negociar melhor o preço</li>
+                        <li class="option">Enviar seu número apenas se o vendedor tiver boas avaliações</li>
+                        <li class="option" data-correct="true">Não aceitar, pois pode ser golpe</li>
+                        <li class="option">Aceitar apenas para tirar dúvidas sobre o produto</li>
+                    </ul>
+                    <div class="explanation">
+                        Toda a comunicação deve ser feita dentro da plataforma do Mercado Livre. Pedidos para conversar por WhatsApp geralmente são tentativas de fraude para negociar fora da plataforma e burlar as proteções do Mercado Livre.
+                    </div>
+                </div>
+                
+                <div class="question" id="question-5">
+                    <h3>5. Quantas compras são feitas no Mercado Livre a cada segundo?</h3>
+                    <ul class="options">
+                        <li class="option">5</li>
+                        <li class="option">7</li>
+                        <li class="option" data-correct="true">9</li>
+                        <li class="option">12</li>
+                    </ul>
+                    <div class="explanation">
+                        O Mercado Livre processa aproximadamente 9 compras por segundo.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="prev-btn" disabled>Anterior</button>
+                <button id="next-btn">Próxima</button>
+                <button id="check-btn" style="display: none;">Verificar</button>
+                <button id="finish-btn" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="result-container" id="result-container">
+            <h2>Resultado do Quiz</h2>
+            <div class="score" id="score">0/5</div>
+            <div class="feedback" id="feedback"></div>
+            <button class="restart-btn" id="restart-btn">Reiniciar Quiz</button>
+        </div>
+        
+        <footer>
+            <p>Quiz sobre Mercado Livre - Trabalho de L Dig</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.question');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const checkBtn = document.getElementById('check-btn');
+            const finishBtn = document.getElementById('finish-btn');
+            const progressBar = document.getElementById('progress');
+            const resultContainer = document.getElementById('result-container');
+            const scoreDisplay = document.getElementById('score');
+            const feedbackDisplay = document.getElementById('feedback');
+            const restartBtn = document.getElementById('restart-btn');
+            
+            let currentQuestion = 0;
+            let score = 0;
+            let answeredQuestions = new Array(questions.length).fill(false);
+            
+            // Initialize
+            updateQuestion();
+            
+            // Event listeners
+            prevBtn.addEventListener('click', showPreviousQuestion);
+            nextBtn.addEventListener('click', showNextQuestion);
+            checkBtn.addEventListener('click', checkAnswer);
+            finishBtn.addEventListener('click', showResults);
+            restartBtn.addEventListener('click', restartQuiz);
+            
+            // Add click event listeners to all options
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', selectOption);
+            });
+            
+            function selectOption(e) {
+                const questionElement = questions[currentQuestion];
+                const options = questionElement.querySelectorAll('.option');
+                
+                // Remove selected class from all options
+                options.forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected class to clicked option
+                e.target.classList.add('selected');
+                
+                // Enable check button
+                checkBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+            }
+            
+            function checkAnswer() {
+                const questionElement = questions[currentQuestion];
+                const selectedOption = questionElement.querySelector('.option.selected');
+                const explanation = questionElement.querySelector('.explanation');
+                
+                if (selectedOption) {
+                    const options = questionElement.querySelectorAll('.option');
+                    options.forEach(option => {
+                        option.classList.remove('correct', 'incorrect');
+                        option.removeEventListener('click', selectOption);
+                    });
+                    
+                    const isCorrect = selectedOption.hasAttribute('data-correct');
+                    
+                    if (isCorrect) {
+                        selectedOption.classList.add('correct');
+                        if (!answeredQuestions[currentQuestion]) {
+                            score++;
+                            answeredQuestions[currentQuestion] = true;
+                        }
+                    } else {
+                        selectedOption.classList.add('incorrect');
+                        const correctOption = questionElement.querySelector('[data-correct="true"]');
+                        if (correctOption) {
+                            correctOption.classList.add('correct');
+                        }
+                        answeredQuestions[currentQuestion] = true;
+                    }
+                    
+                    // Show explanation
+                    explanation.style.display = 'block';
+                    
+                    // Hide check button, show next/finish button
+                    checkBtn.style.display = 'none';
+                    
+                    if (currentQuestion === questions.length - 1) {
+                        finishBtn.style.display = 'inline-block';
+                    } else {
+                        nextBtn.style.display = 'inline-block';
+                    }
+                }
+            }
+            
+            function showPreviousQuestion() {
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    updateQuestion();
+                }
+            }
+            
+            function showNextQuestion() {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    updateQuestion();
+                }
+            }
+            
+            function updateQuestion() {
+                // Hide all questions
+                questions.forEach(question => {
+                    question.classList.remove('active');
+                });
+                
+                // Show current question
+                questions[currentQuestion].classList.add('active');
+                
+                // Update progress bar
+                const progressPercentage = ((currentQuestion + 1) / questions.length) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+                
+                // Update buttons
+                prevBtn.disabled = currentQuestion === 0;
+                
+                // Determine if we need to show next or check/finish button
+                const selectedOption = questions[currentQuestion].querySelector('.option.selected');
+                const explanation = questions[currentQuestion].querySelector('.explanation');
+                
+                if (explanation.style.display === 'block') {
+                    // This question has been answered
+                    checkBtn.style.display = 'none';
+                    
+                    if (currentQuestion === questions.length - 1) {
+                        nextBtn.style.display = 'none';
+                        finishBtn.style.display = 'inline-block';
+                    } else {
+                        nextBtn.style.display = 'inline-block';
+                        finishBtn.style.display = 'none';
+                    }
+                } else {
+                    // Not answered yet
+                    finishBtn.style.display = 'none';
+                    
+                    if (selectedOption) {
+                        checkBtn.style.display = 'inline-block';
+                        nextBtn.style.display = 'none';
+                    } else {
+                        checkBtn.style.display = 'none';
+                        nextBtn.style.display = 'inline-block';
+                    }
+                }
+                
+                // If this is the last question, show finish button instead of next
+                if (currentQuestion === questions.length - 1 && explanation.style.display === 'block') {
+                    nextBtn.style.display = 'none';
+                    finishBtn.style.display = 'inline-block';
+                }
+            }
+            
+            function showResults() {
+                document.querySelector('.quiz-container').style.display = 'none';
+                resultContainer.classList.add('active');
+                
+                // Display score
+                scoreDisplay.textContent = `${score}/${questions.length}`;
+                
+                // Display feedback
+                let feedback = "";
+                if (score === questions.length) {
+                    feedback = "Parabéns! Você acertou todas as questões.";
+                } else if (score >= Math.floor(questions.length * 0.7)) {
+                    feedback = "Muito bom! Você conhece bem o Mercado Livre .";
+                } else if (score >= Math.floor(questions.length * 0.5)) {
+                    feedback = "Você tem um conhecimento ok.";
+                } else {
+                    feedback = "Muito ruim... Tente novamente";
+                }
+                
+                feedbackDisplay.textContent = feedback;
+            }
+            
+            function restartQuiz() {
+                // Reset variables
+                currentQuestion = 0;
+                score = 0;
+                answeredQuestions = new Array(questions.length).fill(false);
+                
+                // Reset UI
+                questions.forEach(question => {
+                    const options = question.querySelectorAll('.option');
+                    const explanation = question.querySelector('.explanation');
+                    
+                    options.forEach(option => {
+                        option.classList.remove('selected', 'correct', 'incorrect');
+                        option.addEventListener('click', selectOption);
+                    });
+                    
+                    explanation.style.display = 'none';
+                });
+                
+                // Show quiz, hide results
+                document.querySelector('.quiz-container').style.display = 'block';
+                resultContainer.classList.remove('active');
+                
+                // Update question
+                updateQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
